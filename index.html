@@ -39,7 +39,7 @@
 
         button {
             background-color: #3498db;
-            color: white;
+            color: white ungrateful
             border: none;
             padding: 10px 20px;
             border-radius: 5px;
@@ -78,19 +78,25 @@
 
         .option-btn {
             background-color: #fff;
-            border: 1px solid #3498db;
+            border: 1px solid #000000; /* Black border */
+            color: #000000; /* Black text */
             padding: 10px;
             border-radius: 5px;
             cursor: pointer;
             font-size: 16px;
         }
 
-        .option-btn:hover {
+        .option-btn:hover:not(:disabled) {
             background-color: #f0f4f8;
         }
 
+        .option-btn:disabled {
+            background-color: #e0e0e0;
+            cursor: not-allowed;
+        }
+
         .option-btn.selected {
-            background-color: #3498db;
+            background-color: #000000; /* Black background on select */
             color: white;
         }
 
@@ -254,7 +260,7 @@
                 const btn = document.createElement('button');
                 btn.className = 'option-btn';
                 btn.textContent = option;
-                btn.onclick = () => selectOption(option);
+                btn.onclick = () => selectOption(option, btn);
                 optionsContainer.appendChild(btn);
             });
 
@@ -263,14 +269,20 @@
             timer = setInterval(updateTimer, 1000);
         }
 
-        function selectOption(selected) {
+        function selectOption(selected, selectedBtn) {
             clearInterval(timer);
             const q = questions[currentQuestion];
             userAnswers[currentQuestion] = selected;
             if (selected !== q.answer) {
                 feedback.textContent = 'Wrong';
             }
-            document.querySelectorAll('.option-btn').forEach(btn => btn.disabled = true);
+            // Lock all options by disabling buttons and adding selected class
+            document.querySelectorAll('.option-btn').forEach(btn => {
+                btn.disabled = true;
+                if (btn === selectedBtn) {
+                    btn.classList.add('selected');
+                }
+            });
             nextBtn.disabled = false;
         }
 
@@ -281,6 +293,10 @@
                 clearInterval(timer);
                 userAnswers[currentQuestion] = null; // Mark as wrong
                 feedback.textContent = 'Time’s up!';
+                // Lock all options on timeout
+                document.querySelectorAll('.option-btn').forEach(btn => {
+                    btn.disabled = true;
+                });
                 nextBtn.disabled = false;
             }
         }
@@ -336,4 +352,4 @@
         }
     </script>
 </body>
-  </html>
+</html>
