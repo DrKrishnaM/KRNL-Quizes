@@ -38,8 +38,8 @@
         }
 
         button {
-            background-color: #3498db;
-            color: white ungrateful
+            background-color: #2ecc71; /* Green buttons */
+            color: white;
             border: none;
             padding: 10px 20px;
             border-radius: 5px;
@@ -54,7 +54,7 @@
         }
 
         button:hover:not(:disabled) {
-            background-color: #2980b9;
+            background-color: #27ae60; /* Darker green on hover */
         }
 
         .timer {
@@ -95,15 +95,29 @@
             cursor: not-allowed;
         }
 
-        .option-btn.selected {
-            background-color: #000000; /* Black background on select */
+        .option-btn.selected.correct {
+            background-color: #2ecc71; /* Green for correct */
             color: white;
+            border-color: #2ecc71;
+        }
+
+        .option-btn.selected.wrong {
+            background-color: #e74c3c; /* Red for wrong */
+            color: white;
+            border-color: #e74c3c;
         }
 
         .feedback {
-            color: #e74c3c;
             font-weight: bold;
             margin: 10px 0;
+        }
+
+        .feedback.correct {
+            color: #2ecc71; /* Green for correct */
+        }
+
+        .feedback.wrong {
+            color: #e74c3c; /* Red for wrong */
         }
 
         .review-item {
@@ -174,52 +188,52 @@
         const questions = [
             {
                 question: "Q1: What is the main focus of KRNL Labs as described in their X bio?",
-                options: ["A social media platform", "The only verifiable orchestration layer", "A gaming protocol", "A DeFi lending app"],
+                options: ["A DeFi lending app", "A gaming protocol", "The only verifiable orchestration layer", "A social media platform"],
                 answer: "The only verifiable orchestration layer"
             },
             {
                 question: "Q2: When is the KRNL testnet scheduled to launch according to their latest X announcement?",
-                options: ["September 29th, 2025", "October 9th, 2025", "November 1st, 2025", "December 15th, 2025"],
+                options: ["December 15th, 2025", "October 9th, 2025", "November 1st, 2025", "September 29th, 2025"],
                 answer: "October 9th, 2025"
             },
             {
                 question: "Q3: What recent event did KRNL recover from, as shared on X?",
-                options: ["A funding round failure", "A security breach via phishing attack", "A community hackathon", "A partnership announcement"],
+                options: ["A security breach via phishing attack", "A community hackathon", "A funding round failure", "A partnership announcement"],
                 answer: "A security breach via phishing attack"
             },
             {
                 question: "Q4: In the Galxe Starboard campaign mentioned on X, how many contributors participated?",
-                options: ["1,200", "4,200", "7,500", "10,000"],
+                options: ["10,000", "7,500", "1,200", "4,200"],
                 answer: "4,200"
             },
             {
                 question: "Q5: What is the prize distribution split for the Galxe rewards as per their X post?",
-                options: ["50% top 50, 50% rest", "80% top 150, 20% others with >1000 aura", "100% to top 100", "Equal for all"],
+                options: ["80% top 150, 20% others with >1000 aura", "50% top 50, 50% rest", "Equal for all", "100% to top 100"],
                 answer: "80% top 150, 20% others with >1000 aura"
             },
             {
                 question: "Q6: Which competition was announced on X to celebrate the testnet launch, ending on Sept 30th?",
-                options: ["Art Contest", "Thread Kompetition for content creation", "Coding Hackathon", "Meme Battle"],
+                options: ["Meme Battle", "Thread Kompetition for content creation", "Art Contest", "Coding Hackathon"],
                 answer: "Thread Kompetition for content creation"
             },
             {
                 question: "Q7: What framework does KRNL provide for trustworthy AI, as detailed in their X thread?",
-                options: ["Just watermarking", "Accountability, Governance, and Transparency features", "Only governance controls", "Data storage only"],
+                options: ["Data storage only", "Just watermarking", "Accountability, Governance, and Transparency features", "Only governance controls"],
                 answer: "Accountability, Governance, and Transparency features"
             },
             {
                 question: "Q8: With which project did KRNL develop a POC for sybil protection without personal data sharing, per X?",
-                options: ["Ethereum Foundation", "Billions Network", "Polygon Labs", "Solana"],
+                options: ["Polygon Labs", "Billions Network", "Solana", "Ethereum Foundation"],
                 answer: "Billions Network"
             },
             {
                 question: "Q9: What event is KRNL participating in as a finalist, announced on X?",
-                options: ["ETH Denver", "TOKEN2049 NEXUS startup competition", "Devcon", "Consensus"],
+                options: ["Consensus", "Devcon", "ETH Denver", "TOKEN2049 NEXUS startup competition"],
                 answer: "TOKEN2049 NEXUS startup competition"
             },
             {
                 question: "Q10: What is the total impressions generated from the Galxe Starboard campaign on X?",
-                options: ["50m", "125m", "200m", "300m"],
+                options: ["200m", "50m", "125m", "300m"],
                 answer: "125m"
             }
         ];
@@ -254,6 +268,7 @@
             questionText.textContent = q.question.replace(q.question.split(':')[0] + ': ', ''); // Remove "Q1: " from question
             optionsContainer.innerHTML = '';
             feedback.textContent = '';
+            feedback.className = 'feedback'; // Reset feedback class
             nextBtn.disabled = true;
 
             q.options.forEach((option, index) => {
@@ -273,15 +288,17 @@
             clearInterval(timer);
             const q = questions[currentQuestion];
             userAnswers[currentQuestion] = selected;
-            if (selected !== q.answer) {
+            if (selected === q.answer) {
+                feedback.textContent = 'Correct';
+                feedback.classList.add('correct');
+                selectedBtn.classList.add('selected', 'correct');
+            } else {
                 feedback.textContent = 'Wrong';
+                feedback.classList.add('wrong');
+                selectedBtn.classList.add('selected', 'wrong');
             }
-            // Lock all options by disabling buttons and adding selected class
             document.querySelectorAll('.option-btn').forEach(btn => {
                 btn.disabled = true;
-                if (btn === selectedBtn) {
-                    btn.classList.add('selected');
-                }
             });
             nextBtn.disabled = false;
         }
@@ -293,7 +310,7 @@
                 clearInterval(timer);
                 userAnswers[currentQuestion] = null; // Mark as wrong
                 feedback.textContent = 'Time’s up!';
-                // Lock all options on timeout
+                feedback.classList.add('wrong');
                 document.querySelectorAll('.option-btn').forEach(btn => {
                     btn.disabled = true;
                 });
@@ -318,7 +335,6 @@
             result.classList.remove('hidden');
             scoreDisplay.textContent = `${score}/${questions.length}`;
             
-            // Performance-based message
             if (score >= 8) {
                 messageDisplay.textContent = 'Awesome job! You’re a KRNL master!';
             } else if (score >= 5) {
@@ -327,7 +343,6 @@
                 messageDisplay.textContent = 'Keep practicing! You’ll get there!';
             }
 
-            // Show question review
             reviewContainer.innerHTML = '';
             questions.forEach((q, index) => {
                 const div = document.createElement('div');
