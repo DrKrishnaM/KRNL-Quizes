@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KRNL Quiz</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f4f8;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 600px;
+            width: 90%;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .section {
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        h1 {
+            color: #2c3e50;
+        }
+
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px;
+        }
+
+        button:disabled {
+            background-color: #bdc3c7;
+            cursor: not-allowed;
+        }
+
+        button:hover:not(:disabled) {
+            background-color: #2980b9;
+        }
+
+        .timer {
+            font-size: 18px;
+            color: #e74c3c;
+            margin-bottom: 10px;
+        }
+
+        .card {
+            background-color: #ecf0f1;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 10px 0;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .option-btn {
+            background-color: #fff;
+            border: 1px solid #3498db;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .option-btn:hover {
+            background-color: #f0f4f8;
+        }
+
+        .option-btn.selected {
+            background-color: #3498db;
+            color: white;
+        }
+
+        .feedback {
+            color: #e74c3c;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+
+        .review-item {
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 10px;
+            margin: 10px 0;
+            text-align: left;
+        }
+
+        .correct {
+            color: #2ecc71;
+        }
+
+        .wrong {
+            color: #e74c3c;
+        }
+
+        @media (max-width: 500px) {
+            .container {
+                width: 95%;
+                padding: 10px;
+            }
+
+            h1 {
+                font-size: 24px;
+            }
+
+            button, .option-btn {
+                font-size: 14px;
+                padding: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Home Page -->
+        <div id="home" class="section">
+            <h1>Welcome to the KRNL Quiz!</h1>
+            <p>Test your knowledge about KRNL Labs with 10 questions!</p>
+            <button onclick="startQuiz()">Start Quiz</button>
+        </div>
+
+        <!-- Quiz Page -->
+        <div id="quiz" class="section hidden">
+            <div class="timer">Time Left: <span id="time">15</span>s</div>
+            <div class="card">
+                <h2 id="question-number"></h2>
+                <h3 id="question"></h3>
+                <div id="options" class="options"></div>
+                <p id="feedback" class="feedback"></p>
+                <button id="next-btn" onclick="nextQuestion()" disabled>Next</button>
+            </div>
+        </div>
+
+        <!-- Result Page -->
+        <div id="result" class="section hidden">
+            <h1>Your Score: <span id="score"></span></h1>
+            <p id="message"></p>
+            <div id="review"></div>
+            <button onclick="retryQuiz()">Retry Quiz</button>
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+            {
+                question: "Q1: What is the main focus of KRNL Labs as described in their X bio?",
+                options: ["A social media platform", "The only verifiable orchestration layer", "A gaming protocol", "A DeFi lending app"],
+                answer: "The only verifiable orchestration layer"
+            },
+            {
+                question: "Q2: When is the KRNL testnet scheduled to launch according to their latest X announcement?",
+                options: ["September 29th, 2025", "October 9th, 2025", "November 1st, 2025", "December 15th, 2025"],
+                answer: "October 9th, 2025"
+            },
+            {
+                question: "Q3: What recent event did KRNL recover from, as shared on X?",
+                options: ["A funding round failure", "A security breach via phishing attack", "A community hackathon", "A partnership announcement"],
+                answer: "A security breach via phishing attack"
+            },
+            {
+                question: "Q4: In the Galxe Starboard campaign mentioned on X, how many contributors participated?",
+                options: ["1,200", "4,200", "7,500", "10,000"],
+                answer: "4,200"
+            },
+            {
+                question: "Q5: What is the prize distribution split for the Galxe rewards as per their X post?",
+                options: ["50% top 50, 50% rest", "80% top 150, 20% others with >1000 aura", "100% to top 100", "Equal for all"],
+                answer: "80% top 150, 20% others with >1000 aura"
+            },
+            {
+                question: "Q6: Which competition was announced on X to celebrate the testnet launch, ending on Sept 30th?",
+                options: ["Art Contest", "Thread Kompetition for content creation", "Coding Hackathon", "Meme Battle"],
+                answer: "Thread Kompetition for content creation"
+            },
+            {
+                question: "Q7: What framework does KRNL provide for trustworthy AI, as detailed in their X thread?",
+                options: ["Just watermarking", "Accountability, Governance, and Transparency features", "Only governance controls", "Data storage only"],
+                answer: "Accountability, Governance, and Transparency features"
+            },
+            {
+                question: "Q8: With which project did KRNL develop a POC for sybil protection without personal data sharing, per X?",
+                options: ["Ethereum Foundation", "Billions Network", "Polygon Labs", "Solana"],
+                answer: "Billions Network"
+            },
+            {
+                question: "Q9: What event is KRNL participating in as a finalist, announced on X?",
+                options: ["ETH Denver", "TOKEN2049 NEXUS startup competition", "Devcon", "Consensus"],
+                answer: "TOKEN2049 NEXUS startup competition"
+            },
+            {
+                question: "Q10: What is the total impressions generated from the Galxe Starboard campaign on X?",
+                options: ["50m", "125m", "200m", "300m"],
+                answer: "125m"
+            }
+        ];
+
+        let currentQuestion = 0;
+        let score = 0;
+        let userAnswers = [];
+        let timer;
+        let timeLeft = 15;
+
+        const home = document.getElementById('home');
+        const quiz = document.getElementById('quiz');
+        const result = document.getElementById('result');
+        const questionNumber = document.getElementById('question-number');
+        const questionText = document.getElementById('question');
+        const optionsContainer = document.getElementById('options');
+        const feedback = document.getElementById('feedback');
+        const nextBtn = document.getElementById('next-btn');
+        const scoreDisplay = document.getElementById('score');
+        const messageDisplay = document.getElementById('message');
+        const reviewContainer = document.getElementById('review');
+
+        function startQuiz() {
+            home.classList.add('hidden');
+            quiz.classList.remove('hidden');
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            const q = questions[currentQuestion];
+            questionNumber.textContent = q.question.split(':')[0]; // e.g., "Q1"
+            questionText.textContent = q.question.replace(q.question.split(':')[0] + ': ', ''); // Remove "Q1: " from question
+            optionsContainer.innerHTML = '';
+            feedback.textContent = '';
+            nextBtn.disabled = true;
+
+            q.options.forEach((option, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.textContent = option;
+                btn.onclick = () => selectOption(option);
+                optionsContainer.appendChild(btn);
+            });
+
+            timeLeft = 15;
+            document.getElementById('time').textContent = timeLeft;
+            timer = setInterval(updateTimer, 1000);
+        }
+
+        function selectOption(selected) {
+            clearInterval(timer);
+            const q = questions[currentQuestion];
+            userAnswers[currentQuestion] = selected;
+            if (selected !== q.answer) {
+                feedback.textContent = 'Wrong';
+            }
+            document.querySelectorAll('.option-btn').forEach(btn => btn.disabled = true);
+            nextBtn.disabled = false;
+        }
+
+        function updateTimer() {
+            timeLeft--;
+            document.getElementById('time').textContent = timeLeft;
+            if (timeLeft <= 0) {
+                clearInterval(timer);
+                userAnswers[currentQuestion] = null; // Mark as wrong
+                feedback.textContent = 'Time’s up!';
+                nextBtn.disabled = false;
+            }
+        }
+
+        function nextQuestion() {
+            if (userAnswers[currentQuestion] === questions[currentQuestion].answer) {
+                score++;
+            }
+            currentQuestion++;
+            if (currentQuestion < questions.length) {
+                loadQuestion();
+            } else {
+                showResult();
+            }
+        }
+
+        function showResult() {
+            quiz.classList.add('hidden');
+            result.classList.remove('hidden');
+            scoreDisplay.textContent = `${score}/${questions.length}`;
+            
+            // Performance-based message
+            if (score >= 8) {
+                messageDisplay.textContent = 'Awesome job! You’re a KRNL master!';
+            } else if (score >= 5) {
+                messageDisplay.textContent = 'Good effort! Try again to improve!';
+            } else {
+                messageDisplay.textContent = 'Keep practicing! You’ll get there!';
+            }
+
+            // Show question review
+            reviewContainer.innerHTML = '';
+            questions.forEach((q, index) => {
+                const div = document.createElement('div');
+                div.className = 'review-item';
+                div.innerHTML = `
+                    <p><strong>${q.question}</strong></p>
+                    <p>Correct Answer: <span class="correct">${q.answer}</span></p>
+                    <p>Your Answer: <span class="${userAnswers[index] === q.answer ? 'correct' : 'wrong'}">
+                        ${userAnswers[index] || 'None (Time’s up)'}</span></p>
+                `;
+                reviewContainer.appendChild(div);
+            });
+        }
+
+        function retryQuiz() {
+            currentQuestion = 0;
+            score = 0;
+            userAnswers = [];
+            result.classList.add('hidden');
+            quiz.classList.remove('hidden');
+            loadQuestion();
+        }
+    </script>
+</body>
+  </html>
